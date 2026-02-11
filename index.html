@@ -6,23 +6,12 @@
 <title>Advanced Phaser Game</title>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 <style>
-    body { margin: 0; background: #111; }
+    body { margin: 0; background: #87CEEB; } /* light sky blue background */
     canvas { display: block; margin: 0 auto; }
 </style>
 </head>
 <body>
 <script>
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {
-        default: 'arcade',
-        arcade: { gravity: { y: 0 } }
-    },
-    scene: [MenuScene, AdventureScene, SurvivalScene, MiniGameScene]
-};
-
 class MenuScene extends Phaser.Scene {
     constructor() { super('Menu'); }
     create() {
@@ -37,8 +26,15 @@ class MenuScene extends Phaser.Scene {
 
 class AdventureScene extends Phaser.Scene {
     constructor() { super('AdventureScene'); }
+    preload() {
+        // load images for player and obstacles
+        this.load.image('player', 'https://i.imgur.com/4AiXzf8.png'); // example player sprite
+        this.load.image('obstacle', 'https://i.imgur.com/OZ3XG3F.png'); // example obstacle sprite
+        this.load.image('background', 'https://i.imgur.com/qf1hH7m.jpg'); // background image
+    }
     create() {
-        this.player = this.physics.add.sprite(400, 500, null).setDisplaySize(50,50).setTint(0x00ff00);
+        this.add.image(400, 300, 'background').setDisplaySize(800,600);
+        this.player = this.physics.add.sprite(400, 500, 'player').setDisplaySize(50,50);
         this.cursors = this.input.keyboard.createCursorKeys();
         this.obstacles = this.physics.add.group();
         this.score = 0;
@@ -70,7 +66,7 @@ class AdventureScene extends Phaser.Scene {
     }
     spawnObstacle() {
         const x = Phaser.Math.Between(50, 750);
-        const o = this.physics.add.sprite(x, 0, null).setDisplaySize(50,50).setTint(0xff0000);
+        const o = this.physics.add.sprite(x, 0, 'obstacle').setDisplaySize(50,50);
         this.obstacles.add(o);
     }
 }
@@ -84,6 +80,18 @@ class MiniGameScene extends Phaser.Scene {
     constructor() { super('MiniGameScene'); }
     create() { this.add.text(400, 300, 'Mini-Game Coming Soon!', { fontSize: '32px', color: '#fff' }).setOrigin(0.5); }
 }
+
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    backgroundColor: 0x87CEEB, // sky blue
+    physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 0 } }
+    },
+    scene: [MenuScene, AdventureScene, SurvivalScene, MiniGameScene]
+};
 
 const game = new Phaser.Game(config);
 </script>
