@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Phaser Game</title>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<style>
+    body { margin: 0; background: #111; }
+    canvas { display: block; margin: 0 auto; }
+</style>
+</head>
+<body>
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 0 } }
+    },
+    scene: [MenuScene, AdventureScene, SurvivalScene, MiniGameScene]
+};
+
+class MenuScene extends Phaser.Scene {
+    constructor() { super('Menu'); }
+    create() {
+        this.add.text(400, 100, 'Ultimate Phaser Game', { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
+        const modes = ['Adventure', 'Survival', 'Mini-Game'];
+        modes.forEach((mode, i) => {
+            const btn = this.add.text(400, 250 + i*60, mode, { fontSize: '32px', color: '#0f0' }).setOrigin(0.5).setInteractive();
+            btn.on('pointerdown', () => this.scene.start(mode.replace('-', '') + 'Scene'));
+        });
+    }
+}
+
+class AdventureScene extends Phaser.Scene {
+    constructor() { super('AdventureScene'); }
+    create() {
+        this.player = this.physics.add.sprite(400, 500, null).setDisplaySize(50,50).setTint(0x00ff00);
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.obstacles = this.physics.add.group();
+        this.score = 0;
+        this.health = 100;
+        this.scoreText = this.add.text(10, 10, 'Score: 0', { fontSize: '24px', color: '#fff' });
+        this.healthText = this.add.text(10, 40, 'Health: 100', { fontSize: '24px', color: '#fff' });
+        this.time.addEvent({ delay: 500, callback: () => this.spawnObstacle(), callbackScope: this, loop: true });
+    }
+    update() {
+        if(this.cursors.left.isDown) this.player.x -= 5;
+        if(this.cursors.right.isDown) this.player.x += 5;
+
+        this.obstacles.children.iterate(o => {
+            o.y += 3;
+            if(o.y > 600) o.destroy();
+            if(Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), o.getBounds())) {
+                this.health -= 1;
+                o.destroy();
+            }
+        });
+
+        this.score += 1;
+        this.scoreText.setText('Score: ' + this.score);
+        this.healthText.setText('Health: ' + this.health);
+
+        if(this.health <= 0) {
+            this.scene.start('Menu');
+        }
+    }
+    spawnObstacle() {
+        const x = Phaser.Math.Between(50, 750);
+        const o = this.physics.add.sprite(x, 0, null).setDisplaySize(50,50).setTint(0xff0000);
+        this.obstacles.add(o);
+    }
+}
+
+class SurvivalScene extends Phaser.Scene {
+    constructor() { super('SurvivalScene'); }
+    create() { this.add.text(400, 300, 'Survival Mode Coming Soon!', { fontSize: '32px', color: '#fff' }).setOrigin(0.5); }
+}
+
+class MiniGameScene extends Phaser.Scene {
+    constructor() { super('MiniGameScene'); }
+    create() { this.add.text(400, 300, 'Mini-Game Coming Soon!', { fontSize: '32px', color: '#fff' }).setOrigin(0.5); }
+}
+
+const game = new Phaser.Game(config);
+</script>
+</body>
+</html>
